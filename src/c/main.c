@@ -67,9 +67,12 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
     graphics_fill_rect(ctx, GRect(12, 12, unobstructed_bounds.size.w-25, unobstructed_bounds.size.h-25), 0, 0);
   #endif
   
+  // Use larger font for 24 hour time and smaller for 12 hour to accomodate for AM/PM
+  GFont time_font = clock_is_24h_style() ? fonts_get_system_font(FONT_KEY_LECO_36_BOLD_NUMBERS) : fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM);
+  
   // Draw the Time
   graphics_context_set_text_color(ctx, GColorWhite);
-  graphics_draw_text( ctx, s_time_text, fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM), GRect(unobstructed_bounds.origin.x, unobstructed_bounds.origin.y+time_y_offset, unobstructed_bounds.size.w, unobstructed_bounds.size.h-time_y_offset), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text( ctx, s_time_text, time_font, GRect(unobstructed_bounds.origin.x, unobstructed_bounds.origin.y+time_y_offset, unobstructed_bounds.size.w, unobstructed_bounds.size.h-time_y_offset), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
     
   // Draw the Date
   graphics_draw_text(ctx, s_date_text, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(unobstructed_bounds.origin.x, unobstructed_bounds.size.h-date_y_offset, unobstructed_bounds.size.w, unobstructed_bounds.size.h-date_y_offset), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
