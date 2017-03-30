@@ -1,10 +1,10 @@
 {
-    "author": "NiVZ",
+    "author": "Octal Tech",
     "dependencies": {},
     "keywords": [],
-    "name": "timberwolf",
+    "name": "2nd-watch",
     "pebble": {
-        "displayName": "Timberwolf",
+        "displayName": "Second Watch",
         "enableMultiJS": true,
         "messageKeys": [],
         "projectType": "native",
@@ -18,7 +18,7 @@
             "chalk",
             "diorite"
         ],
-        "uuid": "2f58f703-6c6b-4e86-8bc4-1ed338b9180c",
+        "uuid": "4bacfe94-6a9b-4fc6-be6c-9b5e4b7d82a6",
         "watchapp": {
             "watchface": true
         }
