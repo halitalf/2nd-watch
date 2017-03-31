@@ -60,33 +60,32 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   }
   inner = connection_service_peek_pebble_app_connection() ? GColorDukeBlue : GColorRed;
   
-  // warning removal hax
-  if(outer == NULL){}
-  if(inner == NULL){}
+  bool round = false;
   
-  // Draw the outer Border
   #if defined(PBL_ROUND)
+    round = true;
+  #endif
+  
+  if(round){
+    // outer
     graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(outer, GColorWhite));
     graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 4), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
-  #else
+    // inner
+    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(inner, GColorLightGray));
+    graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 12), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
+  }else{
     // No stroke width so have to draw 2 rectangles inside one another
+    // outer
     graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(outer, GColorWhite));
     graphics_fill_rect(ctx, GRect(0, 0,unobstructed_bounds.size.w, unobstructed_bounds.size.h), 0, 0);
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_rect(ctx, GRect(4, 4,unobstructed_bounds.size.w-8, unobstructed_bounds.size.h-8), 0, 0);
-  #endif
-  
-  // Draw the inner Border
-  #if defined(PBL_ROUND)
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(inner, GColorLightGray));
-    graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 12), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
-  #else
-    // No stroke width so have to draw 2 rectangles inside one another
+    // inner
     graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(inner, GColorLightGray));
     graphics_fill_rect(ctx, GRect(8, 8, unobstructed_bounds.size.w-16, unobstructed_bounds.size.h-16), 0, 0);
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_rect(ctx, GRect(12, 12, unobstructed_bounds.size.w-25, unobstructed_bounds.size.h-25), 0, 0);
-  #endif
+  }
   
   // Use larger font for 24 hour time and smaller for 12 hour to accomodate for AM/PM
   GFont time_font = clock_is_24h_style() ? fonts_get_system_font(FONT_KEY_LECO_36_BOLD_NUMBERS) : fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM);
