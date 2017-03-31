@@ -9,6 +9,22 @@ static Layer *s_main_window_layer;
 // pointer to canvas layer
 static Layer *s_canvas_layer;
 
+// battery state colors
+GColor8 batt_100 = GColorBlueMoon;
+GColor8 batt_090 = GColorDarkGreen;
+GColor8 batt_070 = GColorGreen;
+GColor8 batt_050 = GColorYellow;
+GColor8 batt_030 = GColorOrange;
+GColor8 batt_010 = GColorDarkCandyAppleRed;
+GColor8 batt_chg = GColorIcterine;
+
+// bluetooth state colors
+GColor8 bt_conn = GColorDukeBlue;
+GColor8 bt_disc = GColorRed;
+
+// default colors
+GColor8 default_outer = batt_100;
+GColor8 default_inner = bt_disc;
 
 
 // function to redraw the watch
@@ -42,14 +58,33 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   
   // Get the current unobstructed bounds
   GRect unobstructed_bounds = layer_get_unobstructed_bounds(this_layer);
+  GColor8 outer = default_outer;
+  GColor8 inner = default_inner;
+  BatteryChargeState bcs = battery_state_service_peek();
+  if(bcs.is_charging){
+    outer = batt_chg;
+  }else if(bcs.charge_percent == 100){
+    outer = batt_100;
+  }else if(bcs.charge_percent <= 10){
+    outer = batt_010;
+  }else if(bcs.charge_percent <= 30){
+    outer = batt_020;
+  }else if(bcs.charge_percent <= 50){
+    outer = batt_050;
+  }else if(bcs.charge_percent <= 70){
+    outer = batt_070;
+  }else if(bcs.charge_percent <= 90){
+    outer = batt_090;
+  }
+  inner = connection_service_peek_pebble_app_connection() ? bt_conn : bt_disc;
   
   // Draw the outer Border
   #if defined(PBL_ROUND)
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(GColorGreen, GColorWhite));
+    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(outer, GColorWhite));
     graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 4), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
   #else
     // No stroke width so have to draw 2 rectangles inside one another
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(GColorGreen, GColorWhite));
+    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(outer, GColorWhite));
     graphics_fill_rect(ctx, GRect(0, 0,unobstructed_bounds.size.w, unobstructed_bounds.size.h), 0, 0);
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_rect(ctx, GRect(4, 4,unobstructed_bounds.size.w-8, unobstructed_bounds.size.h-8), 0, 0);
@@ -57,11 +92,11 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   
   // Draw the inner Border
   #if defined(PBL_ROUND)
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(GColorDarkGreen, GColorLightGray));
+    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(inner, GColorLightGray));
     graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 12), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
   #else
     // No stroke width so have to draw 2 rectangles inside one another
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(GColorDarkGreen, GColorLightGray));
+    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(inner, GColorLightGray));
     graphics_fill_rect(ctx, GRect(8, 8, unobstructed_bounds.size.w-16, unobstructed_bounds.size.h-16), 0, 0);
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_rect(ctx, GRect(12, 12, unobstructed_bounds.size.w-25, unobstructed_bounds.size.h-25), 0, 0);
@@ -88,7 +123,13 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
   
 }
 
+static void handle_bluetooth(bool connected){
+  layer_mark_dirty(s_canvas_layer);
+}
 
+static void handle_battery(BatteryChargeState charge_state){
+  layer_mark_dirty(s_canvas_layer);
+}
 
 static void main_window_load(Window *window) {
   
@@ -109,7 +150,10 @@ static void main_window_load(Window *window) {
   
   // Subscribe to event services
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-  
+  battery_state_service_subscribe(handle_battery);
+  connection_service_subscribe((ConnectionHandlers) {
+    .pebble_app_connection_handler = handle_bluetooth
+  });
 }
 
 
@@ -117,7 +161,6 @@ static void main_window_unload(Window *window) {
   
   // Unsubscribe from event services
   tick_timer_service_unsubscribe();
-    
 }
 
 
