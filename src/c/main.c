@@ -72,20 +72,20 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   
   if(round){
     // outer
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(outer, GColorWhite));
+    graphics_context_set_fill_color(ctx, outer);
     graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 4), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
     // inner
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(inner, GColorLightGray));
+    graphics_context_set_fill_color(ctx, inner);
     graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 12), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
   }else{
     // No stroke width so have to draw 2 rectangles inside one another
     // outer
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(outer, GColorWhite));
+    graphics_context_set_fill_color(ctx, outer);
     graphics_fill_rect(ctx, GRect(0, 0,unobstructed_bounds.size.w, unobstructed_bounds.size.h), 0, 0);
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_rect(ctx, GRect(4, 4,unobstructed_bounds.size.w-8, unobstructed_bounds.size.h-8), 0, 0);
     // inner
-    graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(inner, GColorLightGray));
+    graphics_context_set_fill_color(ctx, inner);
     graphics_fill_rect(ctx, GRect(8, 8, unobstructed_bounds.size.w-16, unobstructed_bounds.size.h-16), 0, 0);
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_rect(ctx, GRect(12, 12, unobstructed_bounds.size.w-25, unobstructed_bounds.size.h-25), 0, 0);
