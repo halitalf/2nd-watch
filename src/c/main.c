@@ -10,21 +10,21 @@ static Layer *s_main_window_layer;
 static Layer *s_canvas_layer;
 
 // battery state colors
-GColor8 batt_100 = GColorBlueMoon;
-GColor8 batt_090 = GColorDarkGreen;
-GColor8 batt_070 = GColorGreen;
-GColor8 batt_050 = GColorYellow;
-GColor8 batt_030 = GColorOrange;
-GColor8 batt_010 = GColorDarkCandyAppleRed;
-GColor8 batt_chg = GColorIcterine;
+const GColor8 batt_100 = GColorBlueMoon;
+const GColor8 batt_090 = GColorDarkGreen;
+const GColor8 batt_070 = GColorGreen;
+const GColor8 batt_050 = GColorYellow;
+const GColor8 batt_030 = GColorOrange;
+const GColor8 batt_010 = GColorDarkCandyAppleRed;
+const GColor8 batt_chg = GColorIcterine;
 
 // bluetooth state colors
-GColor8 bt_conn = GColorDukeBlue;
-GColor8 bt_disc = GColorRed;
+const GColor8 bt_conn = GColorDukeBlue;
+const GColor8 bt_disc = GColorRed;
 
 // default colors
-GColor8 default_outer = batt_100;
-GColor8 default_inner = bt_disc;
+const GColor8 default_outer = batt_100;
+const GColor8 default_inner = bt_disc;
 
 
 // function to redraw the watch
@@ -68,7 +68,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   }else if(bcs.charge_percent <= 10){
     outer = batt_010;
   }else if(bcs.charge_percent <= 30){
-    outer = batt_020;
+    outer = batt_030;
   }else if(bcs.charge_percent <= 50){
     outer = batt_050;
   }else if(bcs.charge_percent <= 70){
