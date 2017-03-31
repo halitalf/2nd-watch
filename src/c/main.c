@@ -39,7 +39,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   strftime(s_date_text, sizeof(s_date_text), "%A, %b %e", tick_time);
 
   // Set some offsets based on watch shape
-  uint8_t time_y_offset = PBL_IF_ROUND_ELSE(50, 30);
+  uint8_t time_y_offset = PBL_IF_ROUND_ELSE(50, 29);
   uint8_t date_y_offset = PBL_IF_ROUND_ELSE(70, 40);
   
   // Time to start drawing!
