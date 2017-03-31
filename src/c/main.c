@@ -9,6 +9,12 @@ static Layer *s_main_window_layer;
 // pointer to canvas layer
 static Layer *s_canvas_layer;
 
+// pointer to bitmap layer
+static BitmapLayer *s_layer;
+
+// pointer to bitmap
+static GBitmap *s_bitmap;
+
 // function to redraw the watch
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 
@@ -122,6 +128,9 @@ static void main_window_load(Window *window) {
   
   // get the main window layer
   s_main_window_layer = window_get_root_layer(s_main_window);
+  
+  // get main window bounds
+  GRect bounds = layer_get_bounds(s_main_window_layer);
 
   // set the main window background color
   window_set_background_color(s_main_window, GColorBlack);
@@ -134,6 +143,19 @@ static void main_window_load(Window *window) {
 
   // Add the layer to our main window layer
   layer_add_child(s_main_window_layer, s_canvas_layer);  
+  
+  // bitmap
+  s_bitmap = gbitmap_create_with_resource(CENTER_PIECE);
+  GPoint center = grect_center_point(&bounds);
+  GSize image_size = gbitmap_get_bounds(s_bitmap).size;
+
+  GRect image_frame = GRect(center.x, center.y, image_size.w, image_size.h);
+  image_frame.origin.x -= image_size.w / 2;
+  image_frame.origin.y -= image_size.h / 2;
+  
+  s_layer = bitmap_layer_create(image_frame);
+  bitmap_layer_set_bitmap(s_layer, s_bitmap);
+  layer_add_child(s_main_window_layer, bitmap_layer_get_layer(s_layer));
   
   // Subscribe to event services
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
@@ -148,7 +170,8 @@ static void main_window_load(Window *window) {
 
 
 static void main_window_unload(Window *window) {
-  
+  bitmap_layer_destroy(s_layer);
+  gbitmap_destroy(s_bitmap);
   // Unsubscribe from event services
   tick_timer_service_unsubscribe();
   // not subscribed if in BW
