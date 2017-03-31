@@ -145,7 +145,7 @@ static void main_window_load(Window *window) {
   layer_add_child(s_main_window_layer, s_canvas_layer);  
   
   // bitmap
-  s_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CENTER_PIECE);
+  s_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CENTER_PIECE_WHITE);
   GPoint center = grect_center_point(&bounds);
   GSize image_size = gbitmap_get_bounds(s_bitmap).size;
 
