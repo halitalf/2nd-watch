@@ -40,25 +40,29 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   
   // Get the current unobstructed bounds
   GRect unobstructed_bounds = layer_get_unobstructed_bounds(this_layer);
-  GColor8 outer = GColorBlueMoon;
-  GColor8 inner = GColorRed;
+  GColor8 outer = PBL_IF_COLOR_ELSE(GColorBlueMoon, GColorWhite);
+  GColor8 inner = PBL_IF_COLOR_ELSE(GColorRed, GColorLightGray);
   BatteryChargeState bcs = battery_state_service_peek();
-  if(bcs.is_charging){
-    outer = GColorIcterine;
-  }else if(bcs.charge_percent == 100){
-    outer = GColorBlueMoon;
-  }else if(bcs.charge_percent <= 10){
-    outer = GColorDarkCandyAppleRed;
-  }else if(bcs.charge_percent <= 30){
-    outer = GColorOrange;
-  }else if(bcs.charge_percent <= 50){
-    outer = GColorYellow;
-  }else if(bcs.charge_percent <= 70){
-    outer = GColorGreen;
-  }else if(bcs.charge_percent <= 90){
-    outer = GColorDarkGreen;
-  }
-  inner = connection_service_peek_pebble_app_connection() ? GColorDukeBlue : GColorRed;
+  #if defined(PBL_BW)
+    if(bcs.is_charging){
+      outer = GColorIcterine;
+    }else if(bcs.charge_percent == 100){
+      outer = GColorBlueMoon;
+    }else if(bcs.charge_percent <= 10){
+      outer = GColorDarkCandyAppleRed;
+    }else if(bcs.charge_percent <= 30){
+      outer = GColorOrange;
+    }else if(bcs.charge_percent <= 50){
+      outer = GColorYellow;
+    }else if(bcs.charge_percent <= 70){
+      outer = GColorGreen;
+    }else if(bcs.charge_percent <= 90){
+      outer = GColorDarkGreen;
+    }
+  #else
+    outer = GColorWhite;
+  #endif
+  inner = PBL_IF_COLOR_ELSE(connection_service_peek_pebble_app_connection() ? GColorDukeBlue : GColorRed,GColorLightGray);
   
   bool round = false;
   
