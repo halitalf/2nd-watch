@@ -10,21 +10,21 @@ static Layer *s_main_window_layer;
 static Layer *s_canvas_layer;
 
 // battery state colors
-static GColor8 batt_100 = GColorBlueMoon;
-static GColor8 batt_090 = GColorDarkGreen;
-static GColor8 batt_070 = GColorGreen;
-static GColor8 batt_050 = GColorYellow;
-static GColor8 batt_030 = GColorOrange;
-static GColor8 batt_010 = GColorDarkCandyAppleRed;
-static GColor8 batt_chg = GColorIcterine;
+const GColor8 batt_100 = GColorBlueMoon;
+const GColor8 batt_090 = GColorDarkGreen;
+const GColor8 batt_070 = GColorGreen;
+const GColor8 batt_050 = GColorYellow;
+const GColor8 batt_030 = GColorOrange;
+const GColor8 batt_010 = GColorDarkCandyAppleRed;
+const GColor8 batt_chg = GColorIcterine;
 
 // bluetooth state colors
-static GColor8 bt_conn = GColorDukeBlue;
-static GColor8 bt_disc = GColorRed;
+const GColor8 bt_conn = GColorDukeBlue;
+const GColor8 bt_disc = GColorRed;
 
 // default colors
-static GColor8 default_outer = GColorBlueMoon;
-static GColor8 default_inner = GColorRed;
+const GColor8 default_outer = GColorBlueMoon;
+const GColor8 default_inner = GColorRed;
 
 
 // function to redraw the watch
