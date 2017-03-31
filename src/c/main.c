@@ -60,6 +60,10 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   }
   inner = connection_service_peek_pebble_app_connection() ? GColorDukeBlue : GColorRed;
   
+  // warning removal hax
+  if(outer == GColorRed){}
+  if(inner == GColorRed){}
+  
   // Draw the outer Border
   #if defined(PBL_ROUND)
     graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(outer, GColorWhite));
