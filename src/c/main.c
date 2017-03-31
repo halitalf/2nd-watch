@@ -23,8 +23,8 @@ const GColor8 bt_conn = GColorDukeBlue;
 const GColor8 bt_disc = GColorRed;
 
 // default colors
-const GColor8 default_outer = batt_100;
-const GColor8 default_inner = bt_disc;
+GColor8 default_outer = batt_100;
+GColor8 default_inner = bt_disc;
 
 
 // function to redraw the watch
