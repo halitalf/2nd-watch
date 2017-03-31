@@ -151,7 +151,7 @@ static void main_window_load(Window *window) {
 
   GRect image_frame = GRect(center.x, center.y, image_size.w, image_size.h);
   image_frame.origin.x -= image_size.w / 2;
-  image_frame.origin.y -= image_size.h / 2;
+  image_frame.origin.y -= image_size.h / 2 + 30;
   
   s_layer = bitmap_layer_create(image_frame);
   bitmap_layer_set_bitmap(s_layer, s_bitmap);
