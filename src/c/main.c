@@ -80,6 +80,16 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 }
 
 
+// Tick handler to force update of watchface
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
+   
+  // Force canvas layer to redraw
+  layer_mark_dirty(s_canvas_layer);
+  
+}
+
+
+
 static void main_window_load(Window *window) {
   
   // get the main window layer
@@ -97,10 +107,16 @@ static void main_window_load(Window *window) {
   // Add the layer to our main window layer
   layer_add_child(s_main_window_layer, s_canvas_layer);  
   
+  // Subscribe to event services
+  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  
 }
 
 
 static void main_window_unload(Window *window) {
+  
+  // Unsubscribe from event services
+  tick_timer_service_unsubscribe();
     
 }
 
