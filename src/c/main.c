@@ -40,22 +40,22 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   
   // Get the current unobstructed bounds
   GRect unobstructed_bounds = layer_get_unobstructed_bounds(this_layer);
+  
+  // prep colors
   GColor8 outer = PBL_IF_COLOR_ELSE(GColorBlueMoon, GColorWhite);
   GColor8 inner = PBL_IF_COLOR_ELSE(GColorRed, GColorLightGray);
-  BatteryChargeState bcs = battery_state_service_peek();
-  #if defined(PBL_BW)
+  
+  // only need BatteryChargeState if we display the battery level
+  #ifndef PBL_BW
+    BatteryChargeState bcs = battery_state_service_peek();
     if(bcs.is_charging){
       outer = GColorIcterine;
     }else if(bcs.charge_percent == 100){
       outer = GColorBlueMoon;
-    }else if(bcs.charge_percent <= 10){
+    }else if(bcs.charge_percent <= 20){
       outer = GColorDarkCandyAppleRed;
-    }else if(bcs.charge_percent <= 30){
-      outer = GColorOrange;
     }else if(bcs.charge_percent <= 50){
-      outer = GColorYellow;
-    }else if(bcs.charge_percent <= 70){
-      outer = GColorGreen;
+      outer = GColorOrange;
     }else if(bcs.charge_percent <= 90){
       outer = GColorDarkGreen;
     }
@@ -64,20 +64,14 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   #endif
   inner = PBL_IF_COLOR_ELSE(connection_service_peek_pebble_app_connection() ? GColorDukeBlue : GColorRed,GColorLightGray);
   
-  bool round = false;
-  
   #if defined(PBL_ROUND)
-    round = true;
-  #endif
-  
-  if(round){
     // outer
     graphics_context_set_fill_color(ctx, outer);
     graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 4), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
     // inner
     graphics_context_set_fill_color(ctx, inner);
     graphics_fill_radial(ctx, grect_crop(unobstructed_bounds, 12), GOvalScaleModeFitCircle, 4, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
-  }else{
+  #else
     // No stroke width so have to draw 2 rectangles inside one another
     // outer
     graphics_context_set_fill_color(ctx, outer);
@@ -89,7 +83,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
     graphics_fill_rect(ctx, GRect(8, 8, unobstructed_bounds.size.w-16, unobstructed_bounds.size.h-16), 0, 0);
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_rect(ctx, GRect(12, 12, unobstructed_bounds.size.w-25, unobstructed_bounds.size.h-25), 0, 0);
-  }
+  #endif
   
   // Use larger font for 24 hour time and smaller for 12 hour to accomodate for AM/PM
   GFont time_font = clock_is_24h_style() ? fonts_get_system_font(FONT_KEY_LECO_36_BOLD_NUMBERS) : fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM);
@@ -112,11 +106,15 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
   
 }
 
-static void handle_bluetooth(bool connected){
+// Bluetooth handler to force update of watchface
+static void bluetooth_handler(bool connected){
+  // Force canvas layer to redraw
   layer_mark_dirty(s_canvas_layer);
 }
 
-static void handle_battery(BatteryChargeState charge_state){
+// Battery handler to force update of watchface
+static void battery_handler(BatteryChargeState charge_state){
+  // Force canvas layer to redraw
   layer_mark_dirty(s_canvas_layer);
 }
 
@@ -139,10 +137,13 @@ static void main_window_load(Window *window) {
   
   // Subscribe to event services
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-  battery_state_service_subscribe(handle_battery);
-  connection_service_subscribe((ConnectionHandlers) {
-    .pebble_app_connection_handler = handle_bluetooth
-  });
+  // no point in subscribing if we won't display it...
+  #ifndef PBL_BW
+    battery_state_service_subscribe(battery_handler);
+    connection_service_subscribe((ConnectionHandlers) {
+      .pebble_app_connection_handler = bluetooth_handler
+    });
+  #endif
 }
 
 
@@ -150,6 +151,11 @@ static void main_window_unload(Window *window) {
   
   // Unsubscribe from event services
   tick_timer_service_unsubscribe();
+  // not subscribed if in BW
+  #ifndef PBL_BW
+    battery_state_service_unsubscribe();
+    connection_service_unsubscribe();
+  #endif
 }
 
 
