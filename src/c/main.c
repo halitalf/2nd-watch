@@ -9,24 +9,6 @@ static Layer *s_main_window_layer;
 // pointer to canvas layer
 static Layer *s_canvas_layer;
 
-// battery state colors
-const GColor8 batt_100 = GColorBlueMoon;
-const GColor8 batt_090 = GColorDarkGreen;
-const GColor8 batt_070 = GColorGreen;
-const GColor8 batt_050 = GColorYellow;
-const GColor8 batt_030 = GColorOrange;
-const GColor8 batt_010 = GColorDarkCandyAppleRed;
-const GColor8 batt_chg = GColorIcterine;
-
-// bluetooth state colors
-const GColor8 bt_conn = GColorDukeBlue;
-const GColor8 bt_disc = GColorRed;
-
-// default colors
-const GColor8 default_outer = GColorBlueMoon;
-const GColor8 default_inner = GColorRed;
-
-
 // function to redraw the watch
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 
@@ -58,25 +40,25 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   
   // Get the current unobstructed bounds
   GRect unobstructed_bounds = layer_get_unobstructed_bounds(this_layer);
-  GColor8 outer = default_outer;
-  GColor8 inner = default_inner;
+  GColor8 outer = GColorBlueMoon;
+  GColor8 inner = GColorRed;
   BatteryChargeState bcs = battery_state_service_peek();
   if(bcs.is_charging){
-    outer = batt_chg;
+    outer = GColorIcterine;
   }else if(bcs.charge_percent == 100){
-    outer = batt_100;
+    outer = GColorBlueMoon;
   }else if(bcs.charge_percent <= 10){
-    outer = batt_010;
+    outer = GColorDarkCandyAppleRed;
   }else if(bcs.charge_percent <= 30){
-    outer = batt_030;
+    outer = GColorOrange;
   }else if(bcs.charge_percent <= 50){
-    outer = batt_050;
+    outer = GColorYellow;
   }else if(bcs.charge_percent <= 70){
-    outer = batt_070;
+    outer = GColorGreen;
   }else if(bcs.charge_percent <= 90){
-    outer = batt_090;
+    outer = GColorDarkGreen;
   }
-  inner = connection_service_peek_pebble_app_connection() ? bt_conn : bt_disc;
+  inner = connection_service_peek_pebble_app_connection() ? GColorDukeBlue : GColorRed;
   
   // Draw the outer Border
   #if defined(PBL_ROUND)
