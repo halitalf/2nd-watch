@@ -9,7 +9,14 @@
         "messageKeys": [],
         "projectType": "native",
         "resources": {
-            "media": []
+            "media": [
+                {
+                    "file": "images/wolf.png",
+                    "name": "CENTER_PIECE",
+                    "targetPlatforms": null,
+                    "type": "png-trans"
+                }
+            ]
         },
         "sdkVersion": "3",
         "targetPlatforms": [
@@ -24,5 +31,5 @@
             "watchface": true
         }
     },
-    "version": "1.0.0"
+    "version": "1.9.0"
 }
