@@ -114,9 +114,18 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
 
 static void unobstructed_area_changed(AnimationProgress progress, void *context){
   if(layer_get_bounds(s_main_window_layer).size.h > layer_get_unobstructed_bounds(s_main_window_layer).size.h){
-    layer_set_hidden(s_layer,true);
+    bitmap_layer_destroy(s_layer);
   }else{
-    layer_set_hidden(s_layer,false);
+    GPoint center = grect_center_point(&bounds);
+    GSize image_size = gbitmap_get_bounds(s_bitmap).size;
+
+    GRect image_frame = GRect(center.x, center.y, image_size.w, image_size.h);
+    image_frame.origin.x -= image_size.w / 2;
+    image_frame.origin.y -= image_size.h / 2 - 11;
+
+    s_layer = bitmap_layer_create(image_frame);
+    bitmap_layer_set_bitmap(s_layer, s_bitmap);
+    layer_add_child(s_main_window_layer, bitmap_layer_get_layer(s_layer));
   }
 }
 
