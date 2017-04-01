@@ -112,6 +112,14 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
   
 }
 
+static void unobstructed_area_changed(AnimationProgress progress, void *context){
+  if(layer_get_bounds(s_main_window_layer).size.h > layer_get_unobstructed_bounds(s_main_window_layer).size.h){
+    layer_set_hidden(s_layer,true);
+  }else{
+    layer_set_hidden(s_layer,false);
+  }
+}
+
 // Bluetooth handler to force update of watchface
 static void bluetooth_handler(bool connected){
   // Force canvas layer to redraw
@@ -159,6 +167,10 @@ static void main_window_load(Window *window) {
   
   // Subscribe to event services
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  UnobstructedAreaHandlers handler = {
+    .change = unobstructed_area_changed
+  };
+  unobstructed_area_service_subscribe(handler, NULL);
   // no point in subscribing if we won't display it...
   #ifndef PBL_BW
     battery_state_service_subscribe(battery_handler);
@@ -174,6 +186,7 @@ static void main_window_unload(Window *window) {
   gbitmap_destroy(s_bitmap);
   // Unsubscribe from event services
   tick_timer_service_unsubscribe();
+  unobstructed_area_service_unsubscribe();
   // not subscribed if in BW
   #ifndef PBL_BW
     battery_state_service_unsubscribe();
