@@ -113,7 +113,8 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
 }
 
 static void unobstructed_area_changed(AnimationProgress progress, void *context){
-  if(layer_get_bounds(s_main_window_layer).size.h > layer_get_unobstructed_bounds(s_main_window_layer).size.h){
+    GRect bounds = layer_get_bounds(s_main_window_layer);
+  if(bounds.size.h > layer_get_unobstructed_bounds(s_main_window_layer).size.h){
     bitmap_layer_destroy(s_layer);
   }else{
     GPoint center = grect_center_point(&bounds);
