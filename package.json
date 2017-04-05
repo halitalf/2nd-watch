@@ -9,7 +9,14 @@
         "messageKeys": [],
         "projectType": "native",
         "resources": {
-            "media": []
+            "media": [
+                {
+                    "file": "images/wolf.png",
+                    "name": "CENTER_PIECE",
+                    "targetPlatforms": null,
+                    "type": "png-trans"
+                }
+            ]
         },
         "sdkVersion": "3",
         "targetPlatforms": [
