@@ -15,6 +15,11 @@ static BitmapLayer *s_layer;
 // pointer to bitmap
 static GBitmap *s_bitmap;
 
+static bool bluetooth_connected;
+
+static BatteryChargeState bcs;
+
+
 // function to redraw the watch
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 
@@ -47,13 +52,21 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	// Get the current unobstructed bounds
 	GRect unobstructed_bounds = layer_get_unobstructed_bounds(this_layer);
 
+  // Hide the bitmap if the screen is obstructed otherwise show it
+  if (unobstructed_bounds.size.h < layer_get_bounds(this_layer).size.h){
+    layer_set_hidden(bitmap_layer_get_layer(s_layer), true);
+  }
+  else{
+    layer_set_hidden(bitmap_layer_get_layer(s_layer), false);
+  }
+  
 	// prep colors
 	GColor8 outer = PBL_IF_COLOR_ELSE(GColorBlueMoon, GColorWhite);
 	GColor8 inner = PBL_IF_COLOR_ELSE(GColorRed, GColorLightGray);
 
 	// only need BatteryChargeState if we display the battery level
 	#ifndef PBL_BW
-	BatteryChargeState bcs = battery_state_service_peek();
+	//BatteryChargeState bcs = battery_state_service_peek();
 	if(bcs.is_charging){
 		outer = GColorIcterine;
 	}else if(bcs.charge_percent == 100){
@@ -68,7 +81,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	#else
 	outer = GColorWhite;
 	#endif
-	inner = PBL_IF_COLOR_ELSE(connection_service_peek_pebble_app_connection() ? GColorDukeBlue : GColorRed,GColorLightGray);
+	inner = PBL_IF_COLOR_ELSE(bluetooth_connected ? GColorDukeBlue : GColorRed,GColorLightGray);
 
 	#if defined(PBL_ROUND)
 	// outer
@@ -112,40 +125,29 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
 
 }
 
-static void unobstructed_area_changed(GRect final_unobstructed_screen_area, void *context){
-	
-	GRect bounds = layer_get_bounds(s_main_window_layer);
-	GRect ubounds = layer_get_unobstructed_bounds(s_main_window_layer);
-
-	if(bounds.size.h > final_unobstructed_screen_area.size.h){
-		bitmap_layer_destroy(s_layer);
-	}else{
-		GPoint center = grect_center_point(&bounds);
-		GSize image_size = gbitmap_get_bounds(s_bitmap).size;
-
-		GRect image_frame = GRect(center.x, center.y, image_size.w, image_size.h);
-		image_frame.origin.x -= image_size.w / 2;
-		image_frame.origin.y -= image_size.h / 2 - 11;
-
-		s_layer = bitmap_layer_create(image_frame);
-		bitmap_layer_set_bitmap(s_layer, s_bitmap);
-		layer_add_child(s_main_window_layer, bitmap_layer_get_layer(s_layer));
-	}
-}
 
 #ifndef PBL_BW
 // Bluetooth handler to force update of watchface
 static void bluetooth_handler(bool connected){
-	// Force canvas layer to redraw
+	
+  // Get the bluetooth connection state
+  bluetooth_connected = connected;
+  
+  // Force canvas layer to redraw
 	layer_mark_dirty(s_canvas_layer);
 }
 
 // Battery handler to force update of watchface
 static void battery_handler(BatteryChargeState charge_state){
+  
+  // Get the battery charge state
+  bcs = charge_state;
+  
 	// Force canvas layer to redraw
 	layer_mark_dirty(s_canvas_layer);
 }
 #endif
+
 
 static void main_window_load(Window *window) {
 
@@ -181,18 +183,19 @@ static void main_window_load(Window *window) {
 	bitmap_layer_set_bitmap(s_layer, s_bitmap);
 	layer_add_child(s_main_window_layer, bitmap_layer_get_layer(s_layer));
 
-	// Subscribe to event services
-	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-	unobstructed_area_service_subscribe((UnobstructedAreaHandlers){
-		.will_change = unobstructed_area_changed
-	}, NULL);
-	// no point in subscribing if we won't display it...
-	#ifndef PBL_BW
+  bluetooth_connected = connection_service_peek_pebble_app_connection();
+  bcs = battery_state_service_peek(); 
+  
+  #ifndef PBL_BW
 	battery_state_service_subscribe(battery_handler);
 	connection_service_subscribe((ConnectionHandlers) {
 		.pebble_app_connection_handler = bluetooth_handler
 	});
 	#endif
+  
+	// Subscribe to event services
+	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+
 }
 
 
@@ -201,7 +204,6 @@ static void main_window_unload(Window *window) {
 	gbitmap_destroy(s_bitmap);
 	// Unsubscribe from event services
 	tick_timer_service_unsubscribe();
-	unobstructed_area_service_unsubscribe();
 	// not subscribed if in BW
 	#ifndef PBL_BW
 	battery_state_service_unsubscribe();
